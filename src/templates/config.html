@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>高空抛物检测系统 - 配置</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">🏠 高空抛物检测系统</div>
+        <div class="nav-links">
+            <a href="/" class="nav-link">首页</a>
+            <a href="/alarms" class="nav-link">📢 告警列表</a>
+            <a href="/config" class="nav-link active">⚙️ 配置</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                <h2>⚙️ 系统配置</h2>
+                <button class="btn btn-success" id="btn-save">💾 保存配置</button>
+            </div>
+
+            <form id="config-form">
+                <!-- 视频源配置 -->
+                <div class="config-section">
+                    <h3>📹 视频源配置</h3>
+                    <div id="video-sources">
+                        <!-- 动态生成 -->
+                    </div>
+                    <button type="button" class="btn btn-sm" id="btn-add-source">+ 添加视频源</button>
+                </div>
+
+                <!-- 检测参数 -->
+                <div class="config-section">
+                    <h3>🎯 检测参数</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>最小面积（像素）</label>
+                            <input type="number" name="detector.min_area" id="det-min-area" min="1" max="10000" step="1">
+                            <small>4×4=16，值越小检测越灵敏</small>
+                        </div>
+                        <div class="form-group">
+                            <label>最大面积（像素）</label>
+                            <input type="number" name="detector.max_area" id="det-max-area" min="100" max="100000" step="100">
+                        </div>
+                        <div class="form-group">
+                            <label>最小宽高比</label>
+                            <input type="number" name="detector.min_aspect" id="det-min-aspect" min="0.01" max="10" step="0.1">
+                        </div>
+                        <div class="form-group">
+                            <label>最大宽高比</label>
+                            <input type="number" name="detector.max_aspect" id="det-max-aspect" min="0.1" max="100" step="0.1">
+                        </div>
+                        <div class="form-group">
+                            <label>最小密实度</label>
+                            <input type="number" name="detector.min_solidity" id="det-min-solidity" min="0.0" max="1.0" step="0.05">
+                            <small>轮廓面积/外接矩形面积，值越大越紧凑</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 背景建模参数 -->
+                <div class="config-section">
+                    <h3>🖼️ 背景建模参数</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>历史帧数（history）</label>
+                            <input type="number" name="background_model.history" id="bg-history" min="1" max="100" step="1">
+                            <small>参考前N帧进行背景建模</small>
+                        </div>
+                        <div class="form-group">
+                            <label>距离阈值（dist2Threshold）</label>
+                            <input type="number" name="background_model.dist2_threshold" id="bg-threshold" min="100" max="5000" step="100">
+                            <small>值越小越灵敏，建议800-1000</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 轨迹分析参数 -->
+                <div class="config-section">
+                    <h3>📈 轨迹分析参数</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>抛物线a阈值</label>
+                            <input type="number" name="trajectory_analyzer.parabola_a_threshold" id="ta-a-threshold" min="0.0" max="1.0" step="0.01">
+                            <small>a>0 判定为下落轨迹</small>
+                        </div>
+                        <div class="form-group">
+                            <label>最小垂直速度（像素/帧）</label>
+                            <input type="number" name="trajectory_analyzer.min_vertical_speed" id="ta-min-vspeed" min="0.0" max="100" step="0.5">
+                        </div>
+                        <div class="form-group">
+                            <label>最大水平/垂直速度比</label>
+                            <input type="number" name="trajectory_analyzer.max_horizontal_ratio" id="ta-max-hratio" min="0.1" max="10.0" step="0.1">
+                            <small>值越小越要求垂直下落</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 告警参数 -->
+                <div class="config-section">
+                    <h3>🚨 告警参数</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>前置录像时长（秒）</label>
+                            <input type="number" name="alarm.pre_alarm_seconds" id="alarm-pre" min="1" max="30" step="1">
+                        </div>
+                        <div class="form-group">
+                            <label>后置录像时长（秒）</label>
+                            <input type="number" name="alarm.post_alarm_seconds" id="alarm-post" min="1" max="30" step="1">
+                        </div>
+                        <div class="form-group">
+                            <label>快照放大倍数</label>
+                            <input type="number" name="alarm.snapshot_scale" id="alarm-scale" min="1.0" max="10.0" step="0.5">
+                        </div>
+                        <div class="form-group">
+                            <label>告警冷却时间（秒）</label>
+                            <input type="number" name="alarm.cooldown_seconds" id="alarm-cooldown" min="1" max="300" step="10">
+                            <small>同一轨迹N秒内不重复告警</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- QQ机器人配置 -->
+                <div class="config-section">
+                    <h3>🤖 QQ机器人配置</h3>
+                    <div class="form-grid">
+                        <div class="form-group checkbox-group">
+                            <label>
+                                <input type="checkbox" name="qq_bot.enabled" id="qq-enabled">
+                                启用QQ机器人推送
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label>API地址</label>
+                            <input type="text" name="qq_bot.api_url" id="qq-api-url" placeholder="http://localhost:8080">
+                        </div>
+                        <div class="form-group">
+                            <label>Access Token</label>
+                            <input type="password" name="qq_bot.access_token" id="qq-token" placeholder="选填">
+                        </div>
+                        <div class="form-group">
+                            <label>推送群号</label>
+                            <input type="text" name="qq_bot.group_id" id="qq-group" placeholder="123456789">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-success btn-lg">💾 保存配置</button>
+                    <button type="button" class="btn btn-secondary" id="btn-reset">🔄 重置为默认值</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="/static/config.js"></script>
+</body>
+</html>

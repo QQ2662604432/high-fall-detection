@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>高空抛物检测系统</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">🏠 高空抛物检测系统</div>
+        <div class="nav-links">
+            <a href="/" class="nav-link active">首页</a>
+            <a href="/alarms" class="nav-link">📢 告警列表</a>
+            <a href="/config" class="nav-link">⚙️ 配置</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="main-grid">
+            <!-- 左侧：视频流 -->
+            <div class="video-section">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>📹 实时视频流</h2>
+                        <span class="status-badge" id="status-badge">已停止</span>
+                    </div>
+                    <div class="video-container">
+                        <img id="video-feed" src="/static/placeholder.jpg" alt="视频流">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧：控制面板 -->
+            <div class="control-section">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>🎮 控制面板</h2>
+                    </div>
+                    <div class="control-buttons">
+                        <button id="btn-start" class="btn btn-success btn-lg">
+                            ▶ 启动检测
+                        </button>
+                        <button id="btn-stop" class="btn btn-danger btn-lg" disabled>
+                            ⏹ 停止检测
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2>📊 系统状态</h2>
+                    </div>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <span class="stat-label">FPS</span>
+                            <span class="stat-value" id="stat-fps">0.0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">检测数</span>
+                            <span class="stat-value" id="stat-detections">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">轨迹数</span>
+                            <span class="stat-value" id="stat-tracks">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">运行时间</span>
+                            <span class="stat-value" id="stat-uptime">00:00:00</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2>🚨 最近告警</h2>
+                        <button class="btn btn-sm" id="btn-refresh-alarms">🔄 刷新</button>
+                    </div>
+                    <div class="alarm-list" id="recent-alarms">
+                        <p class="text-muted">暂无告警</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/main.js"></script>
+</body>
+</html>
