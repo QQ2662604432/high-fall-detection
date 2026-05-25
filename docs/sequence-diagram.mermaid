@@ -1,0 +1,79 @@
+sequenceDiagram
+    participant Main
+    participant Config as config.yaml
+    participant VR as VideoReader
+    participant BM as BackgroundModel
+    participant RM as RegionManager
+    participant DET as Detector
+    participant TRK as Tracker
+    participant TA as TrajectoryAnalyzer
+    participant AH as AlarmHandler
+    participant QQ as QQBot
+
+    Main->>Config: 加载配置
+    Config-->>Main: config dict
+
+    Main->>QQ: 初始化(config)
+    QQ-->>Main: ready
+
+    Main->>AH: 初始化(config, qq_bot)
+    AH-->>Main: ready
+
+    Main->>RM: 初始化(regions_config)
+    RM->>RM: 预计算区域掩膜
+    RM-->>Main: ready
+
+    Main->>BM: 初始化(config)
+    BM-->>Main: ready
+
+    Main->>DET: 初始化(config, region_manager)
+    DET-->>Main: ready
+
+    Main->>TRK: 初始化(config)
+    TRK-->>Main: ready
+
+    Main->>TA: 初始化(config)
+    TA-->>Main: ready
+
+    Main->>VR: 初始化(source, config)
+    VR->>VR: 检测源类型(RTSP/文件)
+    VR-->>Main: ready
+
+    Main->>Main: 进入主循环
+
+    loop 每一帧
+        VR->>VR: read_frame()
+        VR->>VR: 帧入环形缓冲区
+        VR-->>BM: frame (BGR)
+
+        BM->>BM: apply(frame)
+        Note over BM: KNN背景减除<br/>+形态学处理
+        BM-->>DET: fg_mask (二值图)
+
+        DET->>DET: detect(fg_mask, frame)
+        Note over DET: findContours<br/>+面积过滤(minArea=16)
+        DET->>RM: filter_by_region(detections)
+        RM-->>DET: filtered_detections
+        DET-->>TRK: List[DetectionResult]
+
+        TRK->>TRK: update(detections)
+        Note over TRK: SORT: Kalman预测<br/>+匈牙利匹配<br/>+轨迹管理
+        TRK-->>TA: List[Track] (活跃轨迹)
+
+        loop 每个活跃Track
+            TA->>TA: analyze(track)
+            Note over TA: 抛物线拟合<br/>+速度/加速度分析<br/>+方向判断
+
+            alt is_falling_object == True
+                TA-->>AH: TrajectoryResult(falling)
+                AH->>AH: handle_alarm(track, result, frame, reader)
+                AH->>AH: 截取抛物特写放大图
+                AH->>VR: get_buffered_frames(5s)
+                VR-->>AH: 前置帧
+                AH->>AH: 继续录制5秒后置帧
+                AH->>AH: 编码保存告警视频
+                AH->>QQ: send_alarm(alarm_event)
+                QQ-->>AH: send_result
+            end
+        end
+    end

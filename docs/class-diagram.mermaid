@@ -1,0 +1,173 @@
+classDiagram
+    class VideoReader {
+        -source: str
+        -cap: VideoCapture
+        -frame_buffer: deque
+        -buffer_size: int
+        -reconnect_interval: float
+        -is_rtsp: bool
+        +__init__(source: str, config: dict)
+        +read_frame() tuple~bool, ndarray~
+        +get_buffered_frames(seconds: float) list~ndarray~
+        +release() None
+        -_reconnect() bool
+        -_detect_source_type() str
+    }
+
+    class BackgroundModel {
+        -subtractor: BackgroundSubtractorKNN
+        -kernel_open: ndarray
+        -kernel_dilate: ndarray
+        +__init__(config: dict)
+        +apply(frame: ndarray) ndarray
+        +reset() None
+    }
+
+    class Detector {
+        -min_area: int
+        -max_area: int
+        -min_aspect: float
+        -region_manager: RegionManager
+        +__init__(config: dict, region_manager: RegionManager)
+        +detect(fg_mask: ndarray, frame: ndarray) list~DetectionResult~
+        -_filter_by_area(contours: list) list
+        -_filter_by_region(detections: list, frame_shape: tuple) list
+    }
+
+    class RegionManager {
+        -detect_regions: list~PolygonRegion~
+        -shield_regions: list~PolygonRegion~
+        -region_mask_detect: ndarray
+        -region_mask_shield: ndarray
+        -frame_size: tuple
+        +__init__(config: dict)
+        +is_in_detect_region(point: tuple) bool
+        +is_in_shield_region(point: tuple) bool
+        +filter_detections(detections: list, frame_shape: tuple) list
+        +draw_regions(frame: ndarray) ndarray
+        -_build_mask(regions: list, shape: tuple) ndarray
+        -_parse_polygon(coords: list) PolygonRegion
+    }
+
+    class Tracker {
+        -sort_tracker: Sort
+        -tracks: dict~int~Track~
+        -max_age: int
+        -min_hits: int
+        +__init__(config: dict)
+        +update(detections: list~DetectionResult~) list~Track~
+        +get_active_tracks() list~Track~
+        +get_track(track_id: int) Track
+        -_to_numpy(detections: list) ndarray
+    }
+
+    class Track {
+        +track_id: int
+        +points: list~tuple~
+        +timestamps: list~float~
+        +velocities: list~float~
+        +frame_ids: list~int~
+        +bbox_history: list~tuple~
+        +age: int
+        +hits: int
+        +is_confirmed: bool
+        +add_point(point: tuple, timestamp: float, frame_id: int, bbox: tuple) None
+        +get_recent_points(n: int) list~tuple~
+        +get_displacement() tuple~float, float~
+    }
+
+    class TrajectoryAnalyzer {
+        -min_points_for_fit: int
+        -parabola_a_threshold: float
+        -min_vertical_speed: float
+        -max_horizontal_ratio: float
+        -min_track_length: int
+        +__init__(config: dict)
+        +analyze(track: Track) TrajectoryResult
+        -_fit_parabola(points: list) tuple~float, float, float~
+        -_calc_velocity(track: Track) tuple~float, float~
+        -_calc_acceleration(track: Track) float
+        -_check_vertical_dominance(track: Track) bool
+        +is_falling_object(result: TrajectoryResult) bool
+    }
+
+    class TrajectoryResult {
+        +track_id: int
+        +is_parabola: bool
+        +parabola_a: float
+        +vertical_speed: float
+        +horizontal_speed: float
+        +acceleration: float
+        +confidence: float
+        +direction: str
+    }
+
+    class AlarmHandler {
+        -output_dir: str
+        -pre_alarm_seconds: float
+        -post_alarm_seconds: float
+        -snapshot_scale: float
+        -active_alarms: dict
+        -qq_bot: QQBot
+        +__init__(config: dict, qq_bot: QQBot)
+        +handle_alarm(track: Track, result: TrajectoryResult, frame: ndarray, reader: VideoReader) AlarmEvent
+        -_capture_snapshot(frame: ndarray, bbox: tuple, scale: float) str
+        -_clip_video(reader: VideoReader, alarm_time: float) str
+        -_generate_alarm_id() str
+    }
+
+    class AlarmEvent {
+        +alarm_id: str
+        +timestamp: datetime
+        +track_id: int
+        +snapshot_path: str
+        +clip_path: str
+        +trajectory_image_path: str
+        +confidence: float
+        +message: str
+    }
+
+    class QQBot {
+        -bot: Bot
+        -group_id: str
+        -enabled: bool
+        +__init__(config: dict)
+        +start() None
+        +send_alarm(alarm: AlarmEvent) bool
+        -_format_message(alarm: AlarmEvent) str
+        +stop() None
+    }
+
+    class DetectionResult {
+        +x: int
+        +y: int
+        +w: int
+        +h: int
+        +area: int
+        +centroid: tuple~int, int~
+        +confidence: float
+        +to_xyxy() tuple~int, int, int, int~
+        +to_xyah() tuple~int, int, float, float~
+    }
+
+    class PolygonRegion {
+        +region_id: str
+        +region_type: str
+        +points: list~tuple~float, float~~
+        +color: tuple~int, int, int~
+        +contains(point: tuple) bool
+    }
+
+    VideoReader --> BackgroundModel : frame
+    BackgroundModel --> Detector : fg_mask
+    Detector --> RegionManager : filter
+    Detector --> Tracker : detections
+    Tracker --> TrajectoryAnalyzer : tracks
+    TrajectoryAnalyzer --> AlarmHandler : TrajectoryResult
+    AlarmHandler --> QQBot : AlarmEvent
+    Tracker --> Track : manage
+    TrajectoryAnalyzer --> TrajectoryResult : produce
+    AlarmHandler --> AlarmEvent : produce
+    Detector --> DetectionResult : produce
+    RegionManager --> PolygonRegion : manage
+    VideoReader --> AlarmHandler : buffered_frames

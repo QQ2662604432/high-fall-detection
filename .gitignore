@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+.pytest_cache/
+*.egg-info/
+dist/
+build/
+output/logs/
+output/snapshots/*.jpg
+output/clips/*.mp4
+.codebuddy/
+*.log

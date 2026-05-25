@@ -1,0 +1,90 @@
+# 视频源配置
+video_sources:
+  - name: "camera_01"
+    url: "rtsp://username:password@192.168.1.100:554/Streaming/Channels/101"
+    enabled: true
+
+# 背景建模参数
+background_model:
+  history: 7                      # KNN历史帧数
+  dist2_threshold: 800            # 距离阈值（越小越灵敏）
+  detect_shadows: false            # 是否检测阴影
+  morph_open_size: 3              # 开运算核大小
+  morph_dilate_size: 2             # 膨胀核大小
+  open_iterations: 1               # 开运算迭代次数
+  dilate_iterations: 1             # 膨胀迭代次数
+
+# 检测器参数
+detector:
+  min_area: 16                    # 最小面积（4×4=16像素）
+  max_area: 5000                  # 最大面积
+  min_aspect: 0.1                 # 最小宽高比
+  max_aspect: 10.0                # 最大宽高比
+  min_solidity: 0.3               # 最小密实度
+
+# 跟踪器参数
+tracker:
+  max_age: 3                      # 丢失N帧后删除轨迹
+  min_hits: 5                     # 连续N帧确认目标
+  iou_threshold: 0.1              # IOU匹配阈值
+
+# 轨迹分析参数
+trajectory_analyzer:
+  min_points_for_fit: 5           # 最少点数用于拟合
+  parabola_a_threshold: 0.01      # 抛物线a阈值
+  min_vertical_speed: 2.0         # 最小垂直速度（像素/帧）
+  max_horizontal_ratio: 2.0       # 最大水平/垂直速度比
+  min_track_length: 5              # 最小轨迹长度
+  min_acceleration: 0.1            # 最小加速度
+  fit_recent_n: 8                 # 用最近N个点拟合
+
+# 告警处理参数
+alarm:
+  output_dir: "output"             # 输出目录
+  pre_alarm_seconds: 5.0          # 告警前录制秒数
+  post_alarm_seconds: 5.0         # 告警后录制秒数
+  snapshot_scale: 4.0             # 快照放大倍数
+  cooldown_seconds: 10.0          # 告警冷却时间（秒）
+
+# QQ机器人参数
+qq_bot:
+  enabled: false                   # 是否启用QQ推送
+  api_url: "http://localhost:8080" # OneBot API地址
+  access_token: ""                 # 访问令牌
+  group_id: ""                     # 推送群号
+
+# 区域配置（多边形检测区域和屏蔽区域）
+regions:
+  detect_regions:
+    - id: "region_1"
+      points:
+        - {x: 0.1, y: 0.2}
+        - {x: 0.3, y: 0.2}
+        - {x: 0.3, y: 0.8}
+        - {x: 0.1, y: 0.8}
+      color: [0, 255, 0]
+  shield_regions:
+    - id: "shield_1"
+      points:
+        - {x: 0.5, y: 0.5}
+        - {x: 0.6, y: 0.5}
+        - {x: 0.6, y: 0.6}
+        - {x: 0.5, y: 0.6}
+      color: [0, 0, 255]
+
+# 视频读取参数
+video_reader:
+  buffer_seconds: 6               # 帧缓冲区大小（秒）
+  reconnect_interval: 3.0         # RTSP重连间隔（秒）
+  max_reconnect_attempts: 10      # 最大重连次数
+
+# 日志配置
+logging:
+  level: "INFO"                   # 日志级别
+  save_to_file: true               # 是否保存到文件
+  log_dir: "output/logs"          # 日志目录
+  max_bytes: 10485760             # 单文件最大字节数（10MB）
+  backup_count: 5                  # 备份文件数
+
+# 显示配置
+display: true                     # 是否显示实时画面

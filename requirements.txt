@@ -1,0 +1,10 @@
+# 核心依赖
+opencv-python>=4.8.0          # 视频IO + 图像处理 + 背景建模
+numpy>=1.24.0                 # 数值计算 + 拟合
+PyYAML>=6.0                   # 配置文件解析
+requests>=2.31.0              # QQ机器人HTTP API调用
+
+# 可选依赖
+opencv-contrib-python>=4.8.0 # 额外算法（如需要）
+pytest>=7.4.0                 # 单元测试
+pytest-cov>=4.1.0             # 测试覆盖率
