@@ -1,100 +1,93 @@
 @echo off
-chcp 65001 >nul
-echo ================================
-echo   高空抛物检测系统 - 环境安装
-echo ================================
+setlocal
+
+echo ========================================
+echo   High-Fall Detection - Setup
+echo ========================================
 echo.
 
-rem ========== 步骤1：检查 Python ==========
-echo ^>>> 检查 Python 版本...
+rem Step 1: Check Python
+echo [1/5] Checking Python...
 python --version >nul 2>&1
 if errorlevel 1 (
-    echo ❌ 错误：未找到 Python！
-    echo 请先安装 Python 3.8 或更高版本。
-    echo 访问：https://www.python.org/downloads/
+    echo ERROR: Python not found!
+    echo Please install Python 3.8 or higher.
+    echo https://www.python.org/downloads/
     pause
     exit /b 1
 )
 
 python --version 2>&1 | findstr /r "^Python 3" >nul
 if errorlevel 1 (
-    echo ❌ 错误：Python 版本过低！
-    echo 需要 Python 3.8 或更高版本。
+    echo ERROR: Python version too old!
+    echo Python 3.8+ required.
     pause
     exit /b 1
 )
 
-echo ✅ Python 已安装
+echo OK: Python found
 echo.
 
-rem ========== 步骤2：创建虚拟环境 ==========
-echo ^>>> 创建虚拟环境...
+rem Step 2: Create virtual environment
+echo [2/5] Creating virtual environment...
 if exist venv (
-    echo 虚拟环境已存在：venv\
-    echo 如果要重建，请先删除 venv\ 目录
+    echo venv/ already exists
 ) else (
     python -m venv venv
     if errorlevel 1 (
-        echo ❌ 虚拟环境创建失败！
+        echo ERROR: Failed to create venv!
         pause
         exit /b 1
     )
-    echo ✅ 虚拟环境创建成功：venv\
+    echo OK: venv/ created
 )
 echo.
 
-rem ========== 步骤3：激活虚拟环境 ==========
-echo ^>>> 激活虚拟环境...
+rem Step 3: Activate virtual environment
+echo [3/5] Activating virtual environment...
 call venv\Scripts\activate.bat
 if errorlevel 1 (
-    echo ❌ 虚拟环境激活失败！
+    echo ERROR: Failed to activate venv!
     pause
     exit /b 1
 )
-echo ✅ 虚拟环境已激活
+echo OK: venv activated
 echo.
 
-rem ========== 步骤4：升级 pip ==========
-echo ^>>> 升级 pip...
+rem Step 4: Upgrade pip
+echo [4/5] Upgrading pip...
 python -m pip install --upgrade pip >nul 2>&1
-echo ✅ pip 升级完成
+echo OK: pip upgraded
 echo.
 
-rem ========== 步骤5：安装依赖包 ==========
-echo ^>>> 安装依赖包（可能需要几分钟)...
+rem Step 5: Install dependencies
+echo [5/5] Installing dependencies...
 if exist requirements.txt (
     pip install -r requirements.txt
     if errorlevel 1 (
-        echo ❌ 依赖包安装失败！
+        echo ERROR: Failed to install dependencies!
         pause
         exit /b 1
     )
-    echo ✅ 依赖包安装完成
+    echo OK: Dependencies installed
 ) else (
-    echo ⚠️  警告：未找到 requirements.txt
+    echo WARNING: requirements.txt not found
 )
-echo.
 
-rem ========== 步骤6：安装 Web UI 依赖 ==========
-echo ^>>> 安装 Web UI 依赖...
+rem Install Flask for Web UI
+echo Installing Flask...
 pip install flask >nul 2>&1
-echo ✅ Web UI 依赖安装完成
+echo OK: Flask installed
 echo.
 
-rem ========== 完成 ==========
-echo ================================
-echo ✅ 安装完成！
-echo ================================
+rem Done
+echo ========================================
+echo   Setup Complete!
+echo ========================================
 echo.
-echo 📋 接下来的步骤：
-echo.
-echo   1. 激活虚拟环境（如果未激活）：
-echo      venv\Scripts\activate.bat
-echo.
-echo   2. 启动 Web UI：
-echo      start_web.bat
-echo.
-echo   3. 在浏览器中访问：
-echo      http://localhost:5000
+echo Next steps:
+echo   1. Activate venv: venv\Scripts\activate.bat
+echo   2. Start Web UI:  start_web.bat
+echo   3. Open browser:  http://localhost:5000
 echo.
 pause
