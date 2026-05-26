@@ -1,39 +1,40 @@
 @echo off
-setlocal
+rem ======================================
+rem  High-Fall Detection - Environment Setup
+rem  Usage: Double-click to run
+rem ======================================
 
-echo ========================================
-echo   High-Fall Detection - Setup
-echo ========================================
+echo ======================================
+echo    High-Fall Detection - Setup
+echo ======================================
 echo.
 
-rem Step 1: Check Python
-echo [1/5] Checking Python...
+rem ===== Step 1: Check Python =====
+echo [1/6] Checking Python...
 python --version >nul 2>&1
 if errorlevel 1 (
-    echo ERROR: Python not found!
-    echo Please install Python 3.8 or higher.
-    echo https://www.python.org/downloads/
-    pause
-    exit /b 1
+    py --version >nul 2>&1
+    if errorlevel 1 (
+        echo ERROR: Python not found!
+        echo Please install Python 3.8+ from: https://www.python.org/downloads/
+        pause
+        exit /b 1
+    ) else (
+        set PYTHON_CMD=py
+    )
+) else (
+    set PYTHON_CMD=python
 )
 
-python --version 2>&1 | findstr /r "^Python 3" >nul
-if errorlevel 1 (
-    echo ERROR: Python version too old!
-    echo Python 3.8+ required.
-    pause
-    exit /b 1
-)
-
-echo OK: Python found
+echo OK: Python found (%PYTHON_CMD%)
 echo.
 
-rem Step 2: Create virtual environment
-echo [2/5] Creating virtual environment...
+rem ===== Step 2: Create venv =====
+echo [2/6] Creating virtual environment...
 if exist venv (
-    echo venv/ already exists
+    echo venv/ already exists. Skipping creation.
 ) else (
-    python -m venv venv
+    %PYTHON_CMD% -m venv venv
     if errorlevel 1 (
         echo ERROR: Failed to create venv!
         pause
@@ -43,8 +44,8 @@ if exist venv (
 )
 echo.
 
-rem Step 3: Activate virtual environment
-echo [3/5] Activating virtual environment...
+rem ===== Step 3: Activate venv =====
+echo [3/6] Activating virtual environment...
 call venv\Scripts\activate.bat
 if errorlevel 1 (
     echo ERROR: Failed to activate venv!
@@ -54,14 +55,14 @@ if errorlevel 1 (
 echo OK: venv activated
 echo.
 
-rem Step 4: Upgrade pip
-echo [4/5] Upgrading pip...
+rem ===== Step 4: Upgrade pip =====
+echo [4/6] Upgrading pip...
 python -m pip install --upgrade pip >nul 2>&1
 echo OK: pip upgraded
 echo.
 
-rem Step 5: Install dependencies
-echo [5/5] Installing dependencies...
+rem ===== Step 5: Install dependencies =====
+echo [5/6] Installing dependencies (this may take a few minutes)...
 if exist requirements.txt (
     pip install -r requirements.txt
     if errorlevel 1 (
@@ -71,23 +72,24 @@ if exist requirements.txt (
     )
     echo OK: Dependencies installed
 ) else (
-    echo WARNING: requirements.txt not found
+    echo WARNING: requirements.txt not found. Skipping.
 )
+echo.
 
-rem Install Flask for Web UI
-echo Installing Flask...
+rem ===== Step 6: Install Flask =====
+echo [6/6] Installing Flask (Web UI)...
 pip install flask >nul 2>&1
 echo OK: Flask installed
 echo.
 
-rem Done
-echo ========================================
-echo   Setup Complete!
-echo ========================================
+rem ===== Done =====
+echo ======================================
+echo    Setup Complete!
+echo ======================================
 echo.
 echo Next steps:
-echo   1. Activate venv: venv\Scripts\activate.bat
-echo   2. Start Web UI:  start_web.bat
-echo   3. Open browser:  http://localhost:5000
+echo   1. Activate venc: venc\Scripts\activate.bat
+echo   2. Start Web UI:  python -m src.web_app_launcher
+echo   3. Open browser:   http://localhost:5000
 echo.
 pause

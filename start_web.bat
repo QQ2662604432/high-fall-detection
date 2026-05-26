@@ -1,41 +1,19 @@
 @echo off
-rem =======================================
-rem  High-Fall Detection - Web UI
-rem =======================================
-echo.
-echo ======= Web UI Start =======
-echo.
-
-rem ======= Check Python =======
-python --version >nul 2>&1
-if errorlevel 1 (
-    py --version >nul 2>&1
-    if errorlevel 1 (
-        echo ERROR: Python not found!
-        echo Please install Python 3.8+
-        echo https://www.python.org/downloads/
-        pause
-        exit /b 1
-    ) else (
-        set PYTHON_CMD=py
-    )
-) else (
-    set PYTHON_CMD=python
-)
-
-echo OK: Python found (%PYTHON_CMD%)
+chcp 65001 >nul 2>&1
+echo =======================================
+echo    High-Fall Detection - Web UI
+echo =======================================
 echo.
 
-rem ======= Check venv =======
 if not exist venv (
     echo ERROR: venv not found!
     echo Please run: setup.bat
+    echo.
     pause
     exit /b 1
 )
 
-rem ======= Activate venv =======
-echo Activating venv...
+echo [1/3] Activating venv...
 call venv\Scripts\activate.bat
 if errorlevel 1 (
     echo ERROR: Failed to activate venv!
@@ -45,8 +23,8 @@ if errorlevel 1 (
 echo OK: venv activated
 echo.
 
-rem ======= Check Flask =======
-%PYTHON_CMD% -c "import flask" >nul 2>&1
+echo [2/3] Checking Flask...
+python -c "import flask" >nul 2>&1
 if errorlevel 1 (
     echo Installing Flask...
     pip install flask
@@ -59,9 +37,9 @@ if errorlevel 1 (
 echo OK: Flask ready
 echo.
 
-rem ======= Start Flask =======
+echo [3/3] Starting Web UI...
 echo =======================================
-echo   Starting Web UI...
+echo    Web UI Starting...
 echo =======================================
 echo.
 echo [Local]  http://localhost:5000
