@@ -1,27 +1,41 @@
 @echo off
-setlocal
+rem =======================================
+rem  High-Fall Detection - Web UI
+rem =======================================
+echo.
+echo ======= Web UI Start =======
+echo.
 
-rem Check if venv exists
+rem ======= Check Python =======
+python --version >nul 2>&1
+if errorlevel 1 (
+    py --version >nul 2>&1
+    if errorlevel 1 (
+        echo ERROR: Python not found!
+        echo Please install Python 3.8+
+        echo https://www.python.org/downloads/
+        pause
+        exit /b 1
+    ) else (
+        set PYTHON_CMD=py
+    )
+) else (
+    set PYTHON_CMD=python
+)
+
+echo OK: Python found (%PYTHON_CMD%)
+echo.
+
+rem ======= Check venv =======
 if not exist venv (
-    echo ========================================
-    echo   ERROR: Virtual environment not found!
-    echo ========================================
-    echo.
-    echo Please run setup.bat first:
-    echo   setup.bat
-    echo.
-    echo This will install all dependencies.
-    echo.
+    echo ERROR: venv not found!
+    echo Please run: setup.bat
     pause
     exit /b 1
 )
 
-echo ========================================
-echo   High-Fall Detection - Web UI
-echo ========================================
-echo.
-
-rem Activate venv
+rem ======= Activate venv =======
+echo Activating venv...
 call venv\Scripts\activate.bat
 if errorlevel 1 (
     echo ERROR: Failed to activate venv!
@@ -31,23 +45,34 @@ if errorlevel 1 (
 echo OK: venv activated
 echo.
 
-rem Check Flask
-python -c "import flask" 2>nul
+rem ======= Check Flask =======
+%PYTHON_CMD% -c "import flask" >nul 2>&1
 if errorlevel 1 (
     echo Installing Flask...
     pip install flask
+    if errorlevel 1 (
+        echo ERROR: Flask installation failed!
+        pause
+        exit /b 1
+    )
 )
-
-rem Start Flask
-echo Starting Web UI...
+echo OK: Flask ready
 echo.
-echo Open browser:
-echo   http://localhost:5000
+
+rem ======= Start Flask =======
+echo =======================================
+echo   Starting Web UI...
+echo =======================================
+echo.
+echo [Local]  http://localhost:5000
+echo [Local]  http://127.0.0.1:5000
 echo.
 echo Press Ctrl+C to stop
-echo ========================================
+echo =======================================
 echo.
 
 python -m src.web_app_launcher --host 0.0.0.0 --port 5000
 
+echo.
+echo Process exited.
 pause
